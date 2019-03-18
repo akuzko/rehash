@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "rehash"
+
+using Rehash
+
+hash = {
+  foo: {
+    bar: {
+      baz: 1
+    }
+  },
+  other_foo: 2,
+  foos: [
+    { bar: { baz: '3-1' } },
+    { bar: { baz: '3-2' } }
+  ],
+  config: [
+    { name: 'important_value', value: 'yes' },
+    { name: 'secondary_value', value: 'no' }
+  ]
+}
+
+rehash = hash.rehash do |re|
+  re.(
+    '/foo/bar/baz' => '/foo',
+    '/other_foo'   => '/ofoo'
+  )
+
+  re.('/foos' => '/foos') do |items|
+    items.map { |item| item.rehash('/bar/baz' => '/value') }
+  end
+end
+
+require "pry"
+Pry.start
