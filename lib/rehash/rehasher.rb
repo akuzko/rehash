@@ -21,23 +21,41 @@ module Rehash
 
     private
 
-    def get_value(key)
-      key.split(@delimiter).reject(&:empty?).reduce(@hash) do |result, part|
+    def get_value(path)
+      path.split(@delimiter).reject(&:empty?).reduce(@hash) do |result, key|
         return if !result
-        result[part] || result[part.to_sym]
+
+        with_array_access, array_key, index = with_array_access?(key)
+        
+        if with_array_access
+          lookup(result[array_key] || result[array_key.to_sym], index)
+        else
+          result[key] || result[key.to_sym]
+        end
       end
     end
 
-    def put_value(key, value)
-      parts = key.split(@delimiter).reject(&:empty?)
-      parts.each_with_index.reduce(@result) do |res, (part, i)|
-        part_key = @symbolize_keys ? part.to_sym : part
-        if i == parts.length - 1
-          res[part_key] = value
+    def put_value(path, value)
+      keys = path.split(@delimiter).reject(&:empty?)
+      keys.each_with_index.reduce(@result) do |res, (key, i)|
+        result_key = @symbolize_keys ? key.to_sym : key
+        if i == keys.length - 1
+          res[result_key] = value
         else
-          res[part_key] = {}
+          res[result_key] = {}
         end
       end
+    end
+
+    def with_array_access?(key)
+      return key =~ /^([^\[\]]+)\[([\d\w_:-]+)\]$/, $1, $2
+    end
+
+    def lookup(array, index)
+      return array[index.to_i] unless index =~ /^([^:]+):(.+)$/
+      
+      key, value = $1, $2
+      array.find { |item| (item[key] || item[key.to_sym]) == value }
     end
   end
 end

@@ -18,6 +18,10 @@ describe Rehash do
         foos: [
           { bar: { baz: '3-1' } },
           { bar: { baz: '3-2' } }
+        ],
+        config: [
+          { name: 'important_value', value: 'yes' },
+          { name: 'secondary_value', value: 'no' }
         ]
       }
     end
@@ -72,6 +76,18 @@ describe Rehash do
               expect(result).to eq(ofoo: 4, foo: {baz: 2})
             end
           end
+        end
+      end
+
+      describe 'array access' do
+        specify 'by index' do
+          expect(Rehash.rehash(hash, '/foos[1]/bar/baz' => '/last_foo'))
+            .to eq(last_foo: '3-2')
+        end
+
+        specify 'by property lookup' do
+          expect(Rehash.rehash(hash, '/config[name:important_value]/value' => '/important'))
+            .to eq(important: 'yes')
         end
       end
     end

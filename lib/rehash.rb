@@ -11,7 +11,7 @@ module Rehash
   def default_options(value = nil)
     return @@default_options if value.nil?
 
-    @@default_options = value
+    @@default_options = @@default_options.merge(value).freeze
   end
 
   def rehash(hash, opts_or_mapping = {})
