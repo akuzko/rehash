@@ -16,25 +16,48 @@ hash = {
     { bar: { baz: '3-1' } },
     { bar: { baz: '3-2' } }
   ],
-  items: [4],
+  foos2: [
+    { bar: { baz: '4-1' } },
+    { bar: { baz: '4-2' } }
+  ],
+  big_foo: {
+    nested: {
+      bar1: { baz: '5-1' },
+      bar2: { baz: '5-2' },
+      bar3: { baz: '5-3' }
+    }
+  },
+  items: [6],
   config: [
     {name: 'important_value', value: 'yes'},
     {name: 'secondary_value', value: 'no'}
   ]
 }
 
-rehash = hash.rehash do |re|
-  re.(
-    '/foo/bar/baz' => '/foo',
-    '/other_foo'   => '/ofoo',
+rehash = hash.rehash do |r|
+  r.(
+    '/foo/bar/baz' => '/faz',
+    '/other_foo'   => '/foo',
     '/items[0]'    => '/first_item'
   )
 
-  re.('/foos' => '/foos') do |items|
+  r.('/foos' => '/foos') do |items|
     items.map { |item| item.rehash('/bar/baz' => '/value') }
   end
 
-  re.('/config[name:important_value]/value' => '/important')
+  r.map('/foos2' => '/other_foos') do |ir|
+    ir.('/bar/baz' => '/value')
+  end
+
+  r.rehash('/big_foo/nested' => '/') do |hr|
+    hr.(
+      '/bar1/baz' => '/big_baz1',
+      '/bar2/baz' => '/big_baz2',
+      '/bar3/baz' => '/big_baz3'
+    )
+  end
+
+  r.('/config[name:important_value]/value' => '/important')
 end
 
 require "pry"

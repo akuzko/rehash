@@ -19,6 +19,24 @@ module Rehash
       result
     end
 
+    def map(mapping)
+      call(mapping) do |value|
+        value.map do |item|
+          Rehash.rehash(item) do |item_re|
+            yield item_re
+          end
+        end
+      end
+    end
+
+    def rehash(mapping)
+      call(mapping) do |value|
+        Rehash.rehash(value) do |nested_re|
+          yield nested_re
+        end
+      end
+    end
+
     private
 
     def get_value(path)
@@ -37,6 +55,9 @@ module Rehash
 
     def put_value(path, value)
       keys = path.split(@delimiter).reject(&:empty?)
+
+      return @result.merge!(value) if keys.length == 0
+
       keys.each_with_index.reduce(@result) do |res, (key, i)|
         result_key = @symbolize_keys ? key.to_sym : key
         if i == keys.length - 1
