@@ -71,7 +71,7 @@ Rehash.map(hash,
 
 ### Block usage
 
-`Rehash.map` method yield a `Rehasher` instance that allows you to apply multiple
+`Rehash.map` method yield a `Rehash::Mapper` instance that allows you to apply multiple
 mappings, as well as transform mapped values themselves:
 
 ```rb
@@ -179,15 +179,15 @@ end
 
 ### Helper methods
 
-`Rehasher` instance that is yielded to the block also has a couple of small helper
+`Mapper` instance that is yielded to the block also has a couple of small helper
 methods for dealing with arrays and deeply nested values to make things even more DRY.
 
-- `map(from => to, &block)` - used to map a collection at path `from` to a path `to`,
-  yielding a `Rehasher` instance for each item:
+- `map_array(from => to, &block)` - used to map an array of items at path `from` to a path `to`,
+  yielding a `Mapper` instance for each item:
 
 ```rb
 Rehash.map(hash) do |r|
-  r.map('/foos' => '/foos') do |ir|
+  r.map_array('/foos' => '/foos') do |ir|
     ir.('/bar/baz' => '/value')
   end
   # is the same as:
@@ -199,12 +199,12 @@ Rehash.map(hash) do |r|
 end
 ```
 
-- `rehash(from => to, &block)` - yields a `Rehasher` instance for a hash located at
-  the path `from` and puts result of rehashing to the path defined by `to`:
+- `map_hash(from => to, &block)` - yields a `Mapper` instance for a hash located at
+  the path `from` and puts result of mapping to the path defined by `to`:
 
 ```rb
 Rehash.map(hash) do |r|
-  r.rehash('/big_foo/nested' => '/') do |hr|
+  r.map_hash('/big_foo/nested' => '/') do |hr|
     hr.(
       '/bar1/baz' => '/big_baz1',
       '/bar2/baz' => '/big_baz2',

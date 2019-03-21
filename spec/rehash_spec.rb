@@ -46,7 +46,7 @@ describe Rehash do
       end
 
       describe 'block form' do
-        it 'transforms hash yielding a callable rehasher object' do
+        it 'transforms hash yielding a callable mapper object' do
           result =
             Rehash.map(hash) do |r|
               r.(
@@ -116,11 +116,11 @@ describe Rehash do
     end
 
     describe 'helper methods' do
-      describe '#map' do
-        it 'maps enum value yielding rehasher instances' do
+      describe '#map_array' do
+        it 'maps array (any enum, actually) value yielding mapper instances' do
           result =
             Rehash.map(hash) do |r|
-              r.map('/foos' => '/foos') do |ire|
+              r.map_array('/foos' => '/foos') do |ire|
                 ire.('/bar/baz' => '/value')
               end
             end
@@ -130,10 +130,10 @@ describe Rehash do
       end
 
       describe '#rehash' do
-        it 'maps hash value yielding rehasher instance' do
+        it 'maps hash value yielding mapper instance' do
           result =
             Rehash.map(hash) do |r|
-              r.rehash('/big_foo/nested' => '/') do |hr|
+              r.map_hash('/big_foo/nested' => '/') do |hr|
                 hr.(
                   '/bar1/baz' => '/big_baz1',
                   '/bar2/baz' => '/big_baz2',

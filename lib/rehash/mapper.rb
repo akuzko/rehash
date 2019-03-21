@@ -1,5 +1,5 @@
 module Rehash
-  class Rehasher
+  class Mapper
     attr_reader :result
 
     def initialize(source, opts = Rehash.default_options)
@@ -26,7 +26,7 @@ module Rehash
       get_value(path)
     end
 
-    def map(mapping)
+    def map_array(mapping)
       call(mapping) do |value|
         value.map do |item|
           Rehash.map(item) do |item_re|
@@ -36,7 +36,7 @@ module Rehash
       end
     end
 
-    def rehash(mapping)
+    def map_hash(mapping)
       call(mapping) do |value|
         Rehash.map(value) do |nested_re|
           yield nested_re

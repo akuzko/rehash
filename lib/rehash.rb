@@ -1,5 +1,5 @@
 require "rehash/version"
-require "rehash/rehasher"
+require "rehash/mapper"
 require "rehash/hash_extension"
 require "rehash/refinement"
 
@@ -16,9 +16,9 @@ module Rehash
 
   def map(hash, opts_or_mapping = {})
     if block_given?
-      yield Rehasher.new(hash, default_options.merge(opts_or_mapping))
+      yield Mapper.new(hash, default_options.merge(opts_or_mapping))
     else
-      Rehasher.new(hash).(opts_or_mapping)
+      Mapper.new(hash).(opts_or_mapping)
     end
   end
 end
