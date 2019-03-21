@@ -5,8 +5,8 @@ to extract deeply nested values from it to a more convenient form with a simple 
 easy-to use mapping. Inspired by [hash_mapper](https://github.com/ismasan/hash_mapper),
 but has a more DRY and robust API.
 
-Do not be confused with Ruby's core `Hash#rehash` method. This gem is used for
-mapping values from source hash into another one.
+Do not be confused with Ruby's core `Hash#rehash` method. This gem has nothing to
+do with it and is used solely for mapping values from source hash into another one.
 
 [![build status](https://secure.travis-ci.org/akuzko/rehash.png)](http://travis-ci.org/akuzko/rehash)
 

@@ -17,7 +17,8 @@ describe Rehash do
         other_foo: 2,
         foos: [
           { bar: { baz: '3-1' } },
-          { bar: { baz: '3-2' } }
+          { bar: { baz: '3-2' } },
+          { bar: { baz: '3-3' } }
         ],
         config: [
           { name: 'important_value', value: 'yes' },
@@ -68,7 +69,7 @@ describe Rehash do
                 end
               end
 
-            expect(result).to eq(foos: [{value: '3-1'}, {value: '3-2'}])
+            expect(result).to eq(foos: [{value: '3-1'}, {value: '3-2'}, {value: '3-3'}])
           end
 
           context 'when more than one path is specified' do
@@ -88,8 +89,13 @@ describe Rehash do
 
       describe 'array access' do
         specify 'by index' do
-          expect(Rehash.map(hash, '/foos[1]/bar/baz' => '/last_foo'))
-            .to eq(last_foo: '3-2')
+          expect(Rehash.map(hash, '/foos[1]/bar/baz' => '/second_foo'))
+            .to eq(second_foo: '3-2')
+        end
+
+        specify 'by index with negative value' do
+          expect(Rehash.map(hash, '/foos[-1]/bar/baz' => '/last_foo'))
+            .to eq(last_foo: '3-3')
         end
 
         specify 'by property lookup' do
@@ -119,7 +125,7 @@ describe Rehash do
               end
             end
 
-          expect(result).to eq(foos: [{value: '3-1'}, {value: '3-2'}])
+          expect(result).to eq(foos: [{value: '3-1'}, {value: '3-2'}, {value: '3-3'}])
         end
       end
 
