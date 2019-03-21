@@ -10,8 +10,11 @@ module Rehash
     end
 
     def call(mapping, &block)
+      default = mapping.delete(:default) if mapping.key?(:default)
+
       mapping.each do |from, to|
         value = get_value(from)
+        value = default if value.nil? && !default.nil?
         value = yield value if block_given?
         put_value(to, value)
       end

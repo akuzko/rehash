@@ -58,6 +58,9 @@ rehash = hash.rehash do |r|
   end
 
   r.('/config[name:important_value]/value' => '/important')
+  r.('/config[name:missing_value]/value' => '/two', default: 2) do |val|
+    val * 2
+  end
 end
 
 require "pry"

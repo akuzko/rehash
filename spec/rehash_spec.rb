@@ -33,7 +33,7 @@ describe Rehash do
       }
     end
 
-    describe 'default usage' do
+    describe 'usage' do
       it 'transforms hash using specified mapping' do
         result =
           Rehash.rehash(hash,
@@ -95,6 +95,16 @@ describe Rehash do
         specify 'by property lookup' do
           expect(Rehash.rehash(hash, '/config[name:important_value]/value' => '/important'))
             .to eq(important: 'yes')
+        end
+      end
+
+      describe ':default option' do
+        it 'uses default value only if not found or nil' do
+          result = Rehash.rehash(hash) do |r|
+            r.('/foo/bar/baz' => '/faz', '/foo/bar/bak' => '/fak', default: 2)
+          end
+
+          expect(result).to eq(faz: 1, fak: 2)
         end
       end
     end
