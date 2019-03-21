@@ -29,7 +29,7 @@ module Rehash
     def map(mapping)
       call(mapping) do |value|
         value.map do |item|
-          Rehash.rehash(item) do |item_re|
+          Rehash.map(item) do |item_re|
             yield item_re
           end
         end
@@ -38,7 +38,7 @@ module Rehash
 
     def rehash(mapping)
       call(mapping) do |value|
-        Rehash.rehash(value) do |nested_re|
+        Rehash.map(value) do |nested_re|
           yield nested_re
         end
       end

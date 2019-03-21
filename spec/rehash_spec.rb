@@ -36,7 +36,7 @@ describe Rehash do
     describe 'usage' do
       it 'transforms hash using specified mapping' do
         result =
-          Rehash.rehash(hash,
+          Rehash.map(hash,
             '/foo/bar/baz' => '/foo/baz',
             '/other_foo'   => '/ofoo'
           )
@@ -47,7 +47,7 @@ describe Rehash do
       describe 'block form' do
         it 'transforms hash yielding a callable rehasher object' do
           result =
-            Rehash.rehash(hash) do |r|
+            Rehash.map(hash) do |r|
               r.(
                 '/foo/bar/baz' => '/foo/baz',
                 '/other_foo'   => '/ofoo'
@@ -60,10 +60,10 @@ describe Rehash do
         describe 'yielding mapped value' do
           it 'yields a value to a block' do
             result =
-              Rehash.rehash(hash) do |r|
+              Rehash.map(hash) do |r|
                 r.('/foos' => '/foos') do |foos|
                   foos.map do |item|
-                    Rehash.rehash(item, '/bar/baz' => '/value')
+                    Rehash.map(item, '/bar/baz' => '/value')
                   end
                 end
               end
@@ -74,7 +74,7 @@ describe Rehash do
           context 'when more than one path is specified' do
             it 'yields all mapped values' do
               result =
-                Rehash.rehash(hash) do |r|
+                Rehash.map(hash) do |r|
                   r.('/foo/bar/baz' => '/foo/baz', '/other_foo' => '/ofoo') do |val|
                     val * 2
                   end
@@ -88,19 +88,19 @@ describe Rehash do
 
       describe 'array access' do
         specify 'by index' do
-          expect(Rehash.rehash(hash, '/foos[1]/bar/baz' => '/last_foo'))
+          expect(Rehash.map(hash, '/foos[1]/bar/baz' => '/last_foo'))
             .to eq(last_foo: '3-2')
         end
 
         specify 'by property lookup' do
-          expect(Rehash.rehash(hash, '/config[name:important_value]/value' => '/important'))
+          expect(Rehash.map(hash, '/config[name:important_value]/value' => '/important'))
             .to eq(important: 'yes')
         end
       end
 
       describe ':default option' do
         it 'uses default value only if not found or nil' do
-          result = Rehash.rehash(hash) do |r|
+          result = Rehash.map(hash) do |r|
             r.('/foo/bar/baz' => '/faz', '/foo/bar/bak' => '/fak', default: 2)
           end
 
@@ -113,7 +113,7 @@ describe Rehash do
       describe '#map' do
         it 'maps enum value yielding rehasher instances' do
           result =
-            Rehash.rehash(hash) do |r|
+            Rehash.map(hash) do |r|
               r.map('/foos' => '/foos') do |ire|
                 ire.('/bar/baz' => '/value')
               end
@@ -126,7 +126,7 @@ describe Rehash do
       describe '#rehash' do
         it 'maps hash value yielding rehasher instance' do
           result =
-            Rehash.rehash(hash) do |r|
+            Rehash.map(hash) do |r|
               r.rehash('/big_foo/nested' => '/') do |hr|
                 hr.(
                   '/bar1/baz' => '/big_baz1',
@@ -145,7 +145,7 @@ describe Rehash do
       context 'when `false` value is passed' do
         it 'results in string keys' do
           result =
-            Rehash.rehash(hash, symbolize_keys: false) do |r|
+            Rehash.map(hash, symbolize_keys: false) do |r|
               r.(
                 '/foo/bar/baz' => '/foo/baz',
                 '/other_foo'   => '/ofoo'
@@ -160,7 +160,7 @@ describe Rehash do
     describe ':delimiter option' do
       it 'uses specified delimiter to split path' do
         result =
-          Rehash.rehash(hash, delimiter: '.') do |r|
+          Rehash.map(hash, delimiter: '.') do |r|
             r.(
               'foo.bar.baz' => 'foo.baz',
               'other_foo'   => 'ofoo'
@@ -175,12 +175,12 @@ describe Rehash do
       let(:hash) { super().dup.extend(Rehash::HashExtension) }
       
       specify 'basic usage' do
-        expect(hash.rehash('/foo/bar/baz' => '/foo'))
+        expect(hash.map_with('/foo/bar/baz' => '/foo'))
           .to eq(foo: 1)
       end
 
       specify 'with options and block form' do
-        result = hash.rehash(delimiter: '.') do |r|
+        result = hash.map_with(delimiter: '.') do |r|
           r.('foo.bar.baz' => 'foo') { |v| v * 2 }
         end
 
@@ -192,12 +192,11 @@ describe Rehash do
       using Rehash
 
       specify 'basic usage' do
-        expect(hash.rehash('/foo/bar/baz' => '/foo'))
-          .to eq(foo: 1)
+        expect(hash.map_with('/foo/bar/baz' => '/foo')).to eq(foo: 1)
       end
 
       specify 'with options and block form' do
-        result = hash.rehash(delimiter: '.') do |r|
+        result = hash.map_with(delimiter: '.') do |r|
           r.('foo.bar.baz' => 'foo') { |v| v * 2 }
         end
 

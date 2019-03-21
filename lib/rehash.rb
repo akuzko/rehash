@@ -14,7 +14,7 @@ module Rehash
     @@default_options = @@default_options.merge(value).freeze
   end
 
-  def rehash(hash, opts_or_mapping = {})
+  def map(hash, opts_or_mapping = {})
     if block_given?
       yield Rehasher.new(hash, default_options.merge(opts_or_mapping))
     else

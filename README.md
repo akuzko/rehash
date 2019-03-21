@@ -5,6 +5,9 @@ to extract deeply nested values from it to a more convenient form with a simple 
 easy-to use mapping. Inspired by [hash_mapper](https://github.com/ismasan/hash_mapper),
 but has a more DRY and robust API.
 
+Do not be confused with Ruby's core `Hash#rehash` method. This gem is used for
+mapping values from source hash into another one.
+
 [![build status](https://secure.travis-ci.org/akuzko/rehash.png)](http://travis-ci.org/akuzko/rehash)
 
 ## Installation
@@ -12,7 +15,7 @@ but has a more DRY and robust API.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 're-hash'
+gem 're-hash', require: 'rehash'
 ```
 
 And then execute:
@@ -59,7 +62,7 @@ Simple mapping, provided as a mapping hash, allows to quickly map source hash
 values to new structure:
 
 ```rb
-Rehash.rehash(hash,
+Rehash.map(hash,
   '/foo/bar/baz'             => '/faz',
   '/big_foo/nested/bar1/baz' => '/baz1'
 )
@@ -68,11 +71,11 @@ Rehash.rehash(hash,
 
 ### Block usage
 
-`Rehash.rehash` method yield a `Rehasher` instance that allows you to apply multiple
+`Rehash.map` method yield a `Rehasher` instance that allows you to apply multiple
 mappings, as well as transform mapped values themselves:
 
 ```rb
-Rehash.rehash(hash) do |r|
+Rehash.map(hash) do |r|
   r.(
     '/foo/bar/baz' => '/faz',
     '/foo/bar/bak' => '/fak'
@@ -81,13 +84,13 @@ Rehash.rehash(hash) do |r|
     value.to_i
   end
   r.('/foos' => '/foos') do |foos|
-    foos.map{ |item| Rehash.rehash(item, '/bar/baz' => '/value') }
+    foos.map{ |item| Rehash.map(item, '/bar/baz' => '/value') }
   end
 end
 # => {:baz1 => 4, faz: 1, fak: 2, :foos => [{:value => '3-1'}, {:value => '3-2'}]}
 ```
 
-Please note that **return value of the block is the return value of `.rehash` method call**,
+Please note that **return value of the block is the return value of `.map` method call**,
 so inside of this block you may do any kind of additional manipulations over resulting
 object that can be accessed with `r.result` in example above
 
@@ -98,7 +101,7 @@ object that can be accessed with `r.result` in example above
 It is very easy to map values from items within array by accessing them by index:
 
 ```rb
-Rehash.rehash(hash, '/foos[0]/bar/baz' => '/first_faz')
+Rehash.map(hash, '/foos[0]/bar/baz' => '/first_faz')
 # => {:first_faz => '3-1'}
 ```
 
@@ -107,21 +110,23 @@ Rehash.rehash(hash, '/foos[0]/bar/baz' => '/first_faz')
 It is also possible to access item within array by one of it's properties:
 
 ```rb
-Rehash.rehash(hash, '/config[name:important_value]/value' => '/important')
+Rehash.map(hash, '/config[name:important_value]/value' => '/important')
 # => {:important => 'yes'}
 ```
 
 ### Refinement (recommended usage)
 
 `Rehash` also implements a `Hash` class refinement, using which is actually
-**a recommended way** of using `re-hash`:
+**a recommended way** of using `re-hash`. Considering that `#map` and `#rehash`
+methods are part of Ruby's Hash core functionality, `Rehash` allows to use
+`#map_with` method for hash mappings.
 
 ```rb
 using Rehash
 
-hash.rehash('/foo/bar/baz' => '/faz') # => {:faz => 1}
+hash.map_with('/foo/bar/baz' => '/faz') # => {:faz => 1}
 # OR:
-hash.rehash do |r|
+hash.map_with do |r|
   r.('/foo/bar/bak' => '/fak') { |v| v * 2 }
 end
 # => {:fak => 4}
@@ -129,22 +134,22 @@ end
 
 ### HashExtension
 
-In case if you don't want to use refinement and want to have `#rehash` method
+In case if you don't want to use refinement and want to have `#map_with` method
 globally available, you can extend `Hash` itself with core extension:
 
 ```rb
 Hash.send(:include, HashExtension)
 
-{foo: 'baz'}.rehash('/foo' => '/bar') # => {bar: 'baz'}
+{foo: 'baz'}.map_with('/foo' => '/bar') # => {bar: 'baz'}
 ```
 
 ### Options
 
 `Rehash` uses `'/'` as path delimiter by default, as well as it symbolizes resulting
-keys. To use other options on a distinct `rehash` call you have to use block form:
+keys. To use other options on a distinct `map` or `map_with` calls you have to use block form:
 
 ```rb
-Rehash.rehash(hash, delimiter: '.', symbolize_keys: false) do |r|
+Rehash.map(hash, delimiter: '.', symbolize_keys: false) do |r|
   r.('foo.bar.baz' => 'foo.baz')
 )
 # => {"foo" => {"baz" => 1}}
@@ -154,7 +159,7 @@ Or you can set default options globally:
 
 ```rb
 Rehash.default_options(delimiter: '.', symbolize_keys: false)
-Rehash.rehash(hash, 'foo.bar.baz' => 'foo.baz') # => {"foo" => {"baz" => 1}}
+Rehash.map(hash, 'foo.bar.baz' => 'foo.baz') # => {"foo" => {"baz" => 1}}
 ```
 
 ### Default value
@@ -164,7 +169,7 @@ to value that is missing at the specified path in the source hash or is `nil`
 *before* it is yielded to the block (if block is given):
 
 ```rb
-Rehash.rehash(hash) do |r|
+Rehash.map(hash) do |r|
   r.('/foo/bar/baz' => 'faz', '/missing' => '/bak', default: 5) do |value|
     value * 2
   end
@@ -181,14 +186,14 @@ methods for dealing with arrays and deeply nested values to make things even mor
   yielding a `Rehasher` instance for each item:
 
 ```rb
-Rehash.rehash(hash) do |r|
+Rehash.map(hash) do |r|
   r.map('/foos' => '/foos') do |ir|
     ir.('/bar/baz' => '/value')
   end
   # is the same as:
   r.('/foos' => '/foos') do |value|
     value.map do |item|
-      Rehash.rehash(item, '/bar/baz' => '/value')
+      Rehash.map(item, '/bar/baz' => '/value')
     end
   end
 end
@@ -198,7 +203,7 @@ end
   the path `from` and puts result of rehashing to the path defined by `to`:
 
 ```rb
-Rehash.rehash(hash) do |r|
+Rehash.map(hash) do |r|
   r.rehash('/big_foo/nested' => '/') do |hr|
     hr.(
       '/bar1/baz' => '/big_baz1',
