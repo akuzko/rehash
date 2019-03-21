@@ -2,8 +2,8 @@ module Rehash
   class Rehasher
     attr_reader :result
 
-    def initialize(hash, opts = Rehash.default_options)
-      @hash = hash
+    def initialize(source, opts = Rehash.default_options)
+      @source = source
       @result = {}
       @symbolize_keys = opts[:symbolize_keys]
       @delimiter = opts[:delimiter]
@@ -20,6 +20,10 @@ module Rehash
       end
 
       result
+    end
+
+    def [](path)
+      get_value(path)
     end
 
     def map(mapping)
@@ -43,7 +47,7 @@ module Rehash
     private
 
     def get_value(path)
-      path.split(@delimiter).reject(&:empty?).reduce(@hash) do |result, key|
+      path.split(@delimiter).reject(&:empty?).reduce(@source) do |result, key|
         return if !result
 
         with_array_access, array_key, index = with_array_access?(key)

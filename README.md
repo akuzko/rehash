@@ -5,6 +5,8 @@ to extract deeply nested values from it to a more convenient form with a simple 
 easy-to use mapping. Inspired by [hash_mapper](https://github.com/ismasan/hash_mapper),
 but has a more DRY and robust API.
 
+[![build status](https://secure.travis-ci.org/akuzko/rehash.png)](http://travis-ci.org/akuzko/rehash)
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -71,18 +73,21 @@ mappings, as well as transform mapped values themselves:
 
 ```rb
 Rehash.rehash(hash) do |r|
-  r.('/big_foo/nested/bar1/baz' => '/baz1')
-  r.('/foo/bar/baz' => '/faz', '/foo/bar/bak' => 'fak') do |value|
-    value * 2
+  r.(
+    '/foo/bar/baz' => '/faz',
+    '/foo/bar/bak' => '/fak'
+  )
+  r.('/big_foo/nested/bar1/baz' => '/baz1') do |value|
+    value.to_i
   end
   r.('/foos' => '/foos') do |foos|
     foos.map{ |item| Rehash.rehash(item, '/bar/baz' => '/value') }
   end
 end
-# => {:baz1 => '4-1', faz: 2, fak: 4, :foos => [{:value => '3-1'}, {:value => '3-2'}]}
+# => {:baz1 => 4, faz: 1, fak: 2, :foos => [{:value => '3-1'}, {:value => '3-2'}]}
 ```
 
-Please note that *return value of the block is the return value of `.rehash` method call*,
+Please note that **return value of the block is the return value of `.rehash` method call**,
 so inside of this block you may do any kind of additional manipulations over resulting
 object that can be accessed with `r.result` in example above
 
@@ -106,10 +111,10 @@ Rehash.rehash(hash, '/config[name:important_value]/value' => '/important')
 # => {:important => 'yes'}
 ```
 
-### Refinement
+### Refinement (recommended usage)
 
 `Rehash` also implements a `Hash` class refinement, using which is actually
-*a recommended way* of using `re-hash`:
+**a recommended way** of using `re-hash`:
 
 ```rb
 using Rehash
@@ -172,7 +177,7 @@ end
 `Rehasher` instance that is yielded to the block also has a couple of small helper
 methods for dealing with arrays and deeply nested values to make things even more DRY.
 
-- `#map(from => to, &block)` - used to map a collection at path `from` to a path `to`,
+- `map(from => to, &block)` - used to map a collection at path `from` to a path `to`,
   yielding a `Rehasher` instance for each item:
 
 ```rb

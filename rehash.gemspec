@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Artem Kuzko"]
   spec.email         = ["a.kuzko@gmail.com"]
 
-  spec.summary       = %q{Easy-to-use hash transformation / values re-mapping.}
-  spec.description   = %q{Easy-to-use hash transformation / values re-mapping.}
-  spec.homepage      = "https://github.com/akuzko/re-hash"
+  spec.summary       = %q{Easy-to-use hash values mapping and transformation.}
+  spec.description   = %q{Easy-to-use hash deeply nested values mapping and transformation.}
+  spec.homepage      = "https://github.com/akuzko/rehash"
   spec.license       = "MIT"
 
   spec.required_ruby_version = '>= 2.1.0'
