@@ -16,7 +16,9 @@ module Rehash
 
   def map(hash, opts_or_mapping = {})
     if block_given?
-      yield Mapper.new(hash, default_options.merge(opts_or_mapping))
+      mapper = Mapper.new(hash, default_options.merge(opts_or_mapping))
+      yield mapper
+      mapper.result
     else
       Mapper.new(hash).(opts_or_mapping)
     end

@@ -75,24 +75,23 @@ Rehash.map(hash,
 mappings, as well as transform mapped values themselves:
 
 ```rb
-Rehash.map(hash) do |r|
-  r.(
+Rehash.map(hash) do |m|
+  m.(
     '/foo/bar/baz' => '/faz',
     '/foo/bar/bak' => '/fak'
   )
-  r.('/big_foo/nested/bar1/baz' => '/baz1') do |value|
+  m.('/big_foo/nested/bar1/baz' => '/baz1') do |value|
     value.to_i
   end
-  r.('/foos' => '/foos') do |foos|
+  m.('/foos' => '/foos') do |foos|
     foos.map{ |item| Rehash.map(item, '/bar/baz' => '/value') }
   end
 end
 # => {:baz1 => 4, faz: 1, fak: 2, :foos => [{:value => '3-1'}, {:value => '3-2'}]}
 ```
 
-Please note that **return value of the block is the return value of `.map` method call**,
-so inside of this block you may do any kind of additional manipulations over resulting
-object that can be accessed with `r.result` in example above
+In case if you need to do any additional manipulations over resulting returned hash,
+you may access it via `Mapper#result` method (i.e. `m.result` in example above)
 
 ### Accessing array items
 
@@ -126,8 +125,8 @@ using Rehash
 
 hash.map_with('/foo/bar/baz' => '/faz') # => {:faz => 1}
 # OR:
-hash.map_with do |r|
-  r.('/foo/bar/bak' => '/fak') { |v| v * 2 }
+hash.map_with do |m|
+  m.('/foo/bar/bak' => '/fak') { |v| v * 2 }
 end
 # => {:fak => 4}
 ```
@@ -149,8 +148,8 @@ Hash.send(:include, HashExtension)
 keys. To use other options on a distinct `map` or `map_with` calls you have to use block form:
 
 ```rb
-Rehash.map(hash, delimiter: '.', symbolize_keys: false) do |r|
-  r.('foo.bar.baz' => 'foo.baz')
+Rehash.map(hash, delimiter: '.', symbolize_keys: false) do |m|
+  m.('foo.bam.baz' => 'foo.baz')
 )
 # => {"foo" => {"baz" => 1}}
 ```
@@ -159,7 +158,7 @@ Or you can set default options globally:
 
 ```rb
 Rehash.default_options(delimiter: '.', symbolize_keys: false)
-Rehash.map(hash, 'foo.bar.baz' => 'foo.baz') # => {"foo" => {"baz" => 1}}
+Rehash.map(hash, 'foo.bam.baz' => 'foo.baz') # => {"foo" => {"baz" => 1}}
 ```
 
 ### Default value
@@ -169,8 +168,8 @@ to value that is missing at the specified path in the source hash or is `nil`
 *before* it is yielded to the block (if block is given):
 
 ```rb
-Rehash.map(hash) do |r|
-  r.('/foo/bar/baz' => 'faz', '/missing' => '/bak', default: 5) do |value|
+Rehash.map(hash) do |m|
+  m.('/foo/bar/baz' => '/faz', '/missing' => '/bak', default: 5) do |value|
     value * 2
   end
 end
@@ -186,12 +185,12 @@ methods for dealing with arrays and deeply nested values to make things even mor
   yielding a `Mapper` instance for each item:
 
 ```rb
-Rehash.map(hash) do |r|
-  r.map_array('/foos' => '/foos') do |ir|
-    ir.('/bar/baz' => '/value')
+Rehash.map(hash) do |m|
+  m.map_array('/foos' => '/foos') do |im|
+    im.('/bar/baz' => '/value')
   end
   # is the same as:
-  r.('/foos' => '/foos') do |value|
+  m.('/foos' => '/foos') do |value|
     value.map do |item|
       Rehash.map(item, '/bar/baz' => '/value')
     end
@@ -203,20 +202,33 @@ end
   the path `from` and puts result of mapping to the path defined by `to`:
 
 ```rb
-Rehash.map(hash) do |r|
-  r.map_hash('/big_foo/nested' => '/') do |hr|
-    hr.(
+Rehash.map(hash) do |m|
+  m.map_hash('/big_foo/nested' => '/') do |hm|
+    hm.(
       '/bar1/baz' => '/big_baz1',
       '/bar2/baz' => '/big_baz2',
       '/bar3/baz' => '/big_baz3'
     )
   end
   # is the same as:
-  r.(
+  m.(
     '/big_foo/nested/bar1/baz' => '/big_baz1',
     '/big_foo/nested/bar2/baz' => '/big_baz2',
     '/big_foo/nested/bar3/baz' => '/big_baz3'
   )
+end
+```
+
+- `[](path)` and `[]=(path, value)` - small helper methods that can be called on mapper
+  object when hash is mapped with a block form. `[](path)` can be used to get the value
+  at the `path` **in source hash**, and `[]=(path, value)` can be used to put the `value`
+  at the `path` **in the resulting hash**:
+
+```rb
+Rehash.map(hash) do |m|
+  m['/faz'] = m['/foo/bar/baz']
+  # is essentially the same as:
+  m.('/foo/bar/baz' => '/faz')
 end
 ```
 

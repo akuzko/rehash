@@ -26,6 +26,10 @@ module Rehash
       get_value(path)
     end
 
+    def []=(path, value)
+      put_value(path, value)
+    end
+
     def map_array(mapping)
       call(mapping) do |value|
         value.map do |item|
