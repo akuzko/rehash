@@ -80,7 +80,7 @@ module Rehash
     end
 
     def with_array_access?(key)
-      return key =~ /^([^\[\]]+)\[([\d\w_:-]+)\]$/, $1, $2
+      return key =~ /^([^\[\]]+)\[([\d\w\s&$_:-]+)\]$/, $1, $2
     end
 
     def lookup(array, index)
