@@ -9,6 +9,7 @@ Do not be confused with Ruby's core `Hash#rehash` method. This gem has nothing t
 do with it and is used solely for mapping values from source hash into another one.
 
 [![build status](https://secure.travis-ci.org/akuzko/rehash.png)](http://travis-ci.org/akuzko/rehash)
+[![github release](https://img.shields.io/github/release/akuzko/rehash.svg)](https://github.com/akuzko/rehash/releases)
 
 ## Installation
 
@@ -87,7 +88,7 @@ Rehash.map(hash) do |m|
     foos.map{ |item| Rehash.map(item, '/bar/baz' => '/value') }
   end
 end
-# => {:baz1 => 4, faz: 1, fak: 2, :foos => [{:value => '3-1'}, {:value => '3-2'}]}
+# => {faz: 1, fak: 2, :baz1 => 4, :foos => [{:value => '3-1'}, {:value => '3-2'}]}
 ```
 
 In case if you need to do any additional manipulations over resulting returned hash,
@@ -149,7 +150,7 @@ keys. To use other options on a distinct `map` or `map_with` calls you have to u
 
 ```rb
 Rehash.map(hash, delimiter: '.', symbolize_keys: false) do |m|
-  m.('foo.bam.baz' => 'foo.baz')
+  m.('foo.bar.baz' => 'foo.baz')
 )
 # => {"foo" => {"baz" => 1}}
 ```
@@ -158,7 +159,7 @@ Or you can set default options globally:
 
 ```rb
 Rehash.default_options(delimiter: '.', symbolize_keys: false)
-Rehash.map(hash, 'foo.bam.baz' => 'foo.baz') # => {"foo" => {"baz" => 1}}
+Rehash.map(hash, 'foo.bar.baz' => 'foo.baz') # => {"foo" => {"baz" => 1}}
 ```
 
 ### Default value
