@@ -30,7 +30,8 @@ describe Rehash do
             bar2: { baz: '4-2' },
             bar3: { baz: '4-3' }
           }
-        }
+        },
+        'falsy_foo' => false
       }
     end
 
@@ -44,16 +45,23 @@ describe Rehash do
         expect(result).to eq(ofoo: 2, foo: {baz: 1})
       end
 
+      it 'preserves boolean values' do
+        result = Rehash.map(hash, '/falsy_foo' => '/is_foo')
+
+        expect(result).to eq(is_foo: false)
+      end
+
       describe 'block form' do
         it 'transforms hash yielding a callable mapper object' do
           result = Rehash.map(hash) do |m|
             m.(
               '/foo/bar/baz' => '/foo/baz',
-              '/other_foo'   => '/ofoo'
+              '/other_foo'   => '/ofoo',
+              '/falsy_foo' => '/is_foo'
             )
           end
 
-          expect(result).to eq(ofoo: 2, foo: {baz: 1})
+          expect(result).to eq(ofoo: 2, is_foo: false, foo: {baz: 1})
         end
 
         describe 'yielding mapped value' do
@@ -181,7 +189,7 @@ describe Rehash do
 
     describe 'HashExtension' do
       let(:hash) { super().dup.extend(Rehash::HashExtension) }
-      
+
       specify 'basic usage' do
         expect(hash.map_with('/foo/bar/baz' => '/foo'))
           .to eq(foo: 1)

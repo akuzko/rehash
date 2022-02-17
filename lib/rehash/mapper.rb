@@ -55,11 +55,11 @@ module Rehash
         return if !result
 
         with_array_access, array_key, index = with_array_access?(key)
-        
+
         if with_array_access
-          lookup(result[array_key] || result[array_key.to_sym], index)
+          lookup(result.key?(array_key) ? result[array_key] : result[array_key.to_sym], index)
         else
-          result[key] || result[key.to_sym]
+          result.key?(key) ? result[key] : result[key.to_sym]
         end
       end
     end
@@ -85,7 +85,7 @@ module Rehash
 
     def lookup(array, index)
       return array[index.to_i] unless index =~ /^([^:]+):(.+)$/
-      
+
       key, value = $1, $2
       array.find { |item| (item[key] || item[key.to_sym]) == value }
     end
